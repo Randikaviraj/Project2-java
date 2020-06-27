@@ -9,14 +9,13 @@ import java.util.Iterator;
 import java.util.Vector;
 
 public class ClientHandle extends Thread{
-
-    private static Gui maingui;
+    
     private Socket client;
     private InputStreamReader input_stream;
     private BufferedReader br;
     private String nameofclient;
     private String symbol;
-    private Vector<Object []> client_vector;
+    private static Vector<Symbols> symbol_vector;
     private PrintStream p;
 
     ClientHandle(Socket client){
@@ -29,66 +28,73 @@ public class ClientHandle extends Thread{
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println("Error is in server handle "+e);
-        }
-
-        
-        this.client_vector=Gui.getRowVector();
+        }  
         
     }
+
+    public static void setClientVector(Vector<Symbols> symbol_vector){
+        ClientHandle.symbol_vector=symbol_vector;
+    }
+
+   
 
     public void run(){
         this.handleClient();
         
     }
 
-    public static void setGui(Gui gui){
-        maingui=gui;
-    }
+    
 
 
     private void handleClient(){
-
-        Iterator<Object[]> iterator = null;
-        Object []row=null;
+        
+        Iterator<Symbols> iterator = null;
+        Symbols sym=null;
         String price;
-        int i;
+        float bidprice=0;
+        
+
         try {
+            
             this.p.println("Enter your name as security code ?");
-            nameofclient=this.br.readLine();
-            this.p.println("Your are welcome to bidding "+nameofclient+".Please enter your symbol to bid...");
+            this.nameofclient=this.br.readLine();
+            this.p.println("Your are welcome to bidding "+this.nameofclient+".Please enter your symbol to bid...");
 
             while (true) {
                 symbol=this.br.readLine();
-                iterator = this.client_vector.iterator();
-
-                i= -1;
+                iterator = symbol_vector.iterator();
+                System.out.println("2");
                 while (iterator.hasNext()) {
-                    i++;
-                    if(!(row=iterator.next())[0].equals(symbol)){
-                        row=null;
+                    sym=iterator.next();
+                    if(!sym.getSymbol().equals(symbol)){
+                        sym=null;
                     }else{
                         break;
-                    }
-                      
+                    } 
                 }
 
-                if (row!=null) {
-                    this.p.println("Current bid price of your "+row[0].toString()+" is  "+row[2].toString());
+                if (sym!=null) {
+                    this.p.println("Let's bid on "+sym.getSymbol());
                     break;
                 }
 
                 this.p.println("Your entered symbol is wrong enter correct one");
             }
 
-            
+          
             this.p.println("Enter your bid price ?");
             while (true) {
-                
                 price=this.br.readLine();
-                row[2]= price;
-                maingui.editRow(price, i,row);
-                row=this.client_vector.get(i);
-                this.p.println("Enter your bid price ? Current bid is "+row[2]);
+
+                if (isNumber(price)) {
+                    bidprice=sym.controlStock(symbol,price);
+                } else {
+                    this.p.println("Error,--Enter a valid bid price ? ");
+                    return;
+                    
+                }
+                
+                this.p.println("Enter your next bid price ? Current bid is "+bidprice);
             }
 
         } catch (Exception e) {
@@ -98,4 +104,20 @@ public class ClientHandle extends Thread{
         }
        
     }
+
+
+    public static boolean isNumber(String num) {
+        if (num == null) {
+            return false;
+        }
+        try {
+            float f = Float.parseFloat(num);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
 }
+
+

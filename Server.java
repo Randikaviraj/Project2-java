@@ -21,6 +21,7 @@ public class  Server{
                         line = in.readLine();
                         if (line.equals("quit")) {
                             in.close();
+                            server.close();
                             System.exit(0); 
                         } 
                     } catch (Exception e) {
@@ -35,9 +36,10 @@ public class  Server{
 
         new Thread(){
             public void run(){
-                Gui.rowAddToGui();
+                Gui.makeGuiVector();
                 Gui serverGui=new Gui();
-                ClientHandle.setGui(serverGui);
+                Symbols.setGui(serverGui);
+                
             }
         }.start();
         
@@ -48,9 +50,9 @@ public class  Server{
         System.out.println("Server is starting on port............"+port_no);
 
         while(true){
-            System.out.println("Server is listening  ");
             client=server.accept();
             new ClientHandle(client).start();
+            System.out.println("Server is listening  ");
         }
     }
 }

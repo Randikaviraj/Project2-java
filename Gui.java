@@ -9,10 +9,11 @@ import java.io.*;
 import java.util.Iterator;
 import java.util.Scanner;
 import java.lang.Thread;
+import java.net.Socket;
 
 public class Gui extends JFrame{
 
-    private static Vector<Object []> row_vector=new <Object[]> Vector();
+    private static Vector<Stock> row_vector=new <Stock>Vector();
     private JTable table;
     DefaultTableModel model;
     JScrollPane pane;
@@ -54,10 +55,11 @@ public class Gui extends JFrame{
 
         add(this.pane);
 
-        Iterator<Object[]> iterator = Gui.row_vector.iterator();
-
+        Iterator<Stock> iterator = Gui.row_vector.iterator();
+        Stock stock;
         while (iterator.hasNext()) {
-            model.addRow(iterator.next());
+            stock=iterator.next();
+            model.addRow(stock.getStock());
         }
 
         setSize(600,600);
@@ -66,10 +68,12 @@ public class Gui extends JFrame{
         
     }
 
-    public static void rowAddToGui(){
+    public static  void makeGuiVector(){
         String [] dataset;
         String  data;
         Object[] row;
+        Stock stock;
+        Vector <Symbols> symbols=new Vector<Symbols>();
         try  
         {  
             //the file to be opened for reading  
@@ -88,11 +92,13 @@ public class Gui extends JFrame{
                 row[0]=dataset[0];
                 row[1]=dataset[1];
                 row[2]=new Float(0.00);
-
-                Gui.row_vector.add(row);
+                stock=new Stock(row,0);
+                Gui.row_vector.add(stock);
+                symbols.add(new Symbols(dataset[0]));
                  
             }  
             sc.close();     //closes the scanner  
+            ClientHandle.setClientVector(symbols);
         }  
         catch(IOException e)  
         {  
@@ -101,16 +107,75 @@ public class Gui extends JFrame{
     }
 
 
-    public synchronized void editRow(String value,int i,Object []element){
+    public synchronized float editRow(String symbol,String price){
+        
+        Object []row=null;
+        Stock temp=null,element=null;
+        Iterator<Stock> itr=row_vector.iterator();
+        int i=-1;
+        int no_of_bids=0;
+        float bid=0;
+
+        while (itr.hasNext()) {
+            i++;
+            element=itr.next();
+            if (!(element.getStock())[0].equals(symbol)) {
+                element=null;
+            } else {
+                row=element.getStock();
+                no_of_bids=element.getNoOfBids()+1;
+               break; 
+            }
+            
+        }
+
         try {
-            Thread.sleep(500);
-            this.model.setValueAt(value, i, 2);
+            
+           
+            if (Float.parseFloat(row[2].toString())< Float.parseFloat(price)) {
+                
+                row[2]=Float.parseFloat(price);
+            }
+
+            
+            bid=Float.parseFloat(row[2].toString());
+            element.setNoOfBids(no_of_bids);
+            element.setStock(row);
             row_vector.set(i, element);
+            this.model.setValueAt(row[0].toString(), i, 0);
+            this.model.setValueAt(row[1].toString(), i, 1);
+            this.model.setValueAt(row[2].toString(), i, 2);
+            
+
+            while (i!=-1) {
+                element=row_vector.get(i);
+                row=element.getStock();
+
+                this.model.setValueAt(row[0], i, 0);
+                this.model.setValueAt(row[1], i, 1);
+                this.model.setValueAt(row[2], i, 2);
+
+                if(i!=0 && row_vector.get(i-1).getNoOfBids()<no_of_bids){
+                    temp = row_vector.get(i-1);
+                    row_vector.set(i-1, element);
+                    row_vector.set(i, temp);
+
+                    row=temp.getStock();
+                    this.model.setValueAt(row[0], i, 0);
+                    this.model.setValueAt(row[1], i, 1);
+                    this.model.setValueAt(row[2], i, 2);
+                }else{
+                    break;
+                }
+                
+                i--;
+            }
         } catch (Exception e) {
             //TODO: handle exception
-            System.out.println("System error  "+e);
+            System.out.println("Erorr  "+e);
+            return -1;
         }
-        
+        return bid;
     }
 
 }
