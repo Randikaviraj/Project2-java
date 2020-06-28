@@ -32,6 +32,19 @@ public class ClientHandle extends Thread{
         
     }
 
+
+    public static boolean isNumeric(String num) {
+        if (num == null) {
+            return false;
+        }
+        try {
+            float f = Float.parseFloat(num);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
     public static void setClientVector(Vector<Symbols> symbol_vector){
         ClientHandle.symbol_vector=symbol_vector;
     }
@@ -63,7 +76,7 @@ public class ClientHandle extends Thread{
             while (true) {
                 symbol=this.br.readLine();
                 iterator = symbol_vector.iterator();
-                System.out.println("2");
+                
                 while (iterator.hasNext()) {
                     sym=iterator.next();
                     if(!sym.getSymbol().equals(symbol)){
@@ -75,26 +88,44 @@ public class ClientHandle extends Thread{
 
                 if (sym!=null) {
                     this.p.println("Let's bid on "+sym.getSymbol());
+                    Iterator<TrackedStock> itr;
+                    itr=TrackedStock.getTracking().iterator();
+                    TrackedStock item;
+                    while (itr.hasNext()) {
+                        item=itr.next();
+                        if (!item.getSymbol().equals(symbol)) {
+                            continue;
+                        }else{
+                            this.p.println(item.getPrice());
+                        }
+                    }
                     break;
                 }
 
                 this.p.println("Your entered symbol is wrong enter correct one");
             }
 
-          
+            
+
+            
             this.p.println("Enter your bid price ?");
             while (true) {
                 price=this.br.readLine();
 
-                if (isNumber(price)) {
-                    bidprice=sym.controlStock(symbol,price);
+                if (isNumeric(price)) {
+                    bidprice=sym.controlStock(symbol,price,this.nameofclient);
                 } else {
                     this.p.println("Error,--Enter a valid bid price ? ");
                     return;
                     
                 }
+
+                if ( Float.parseFloat(price) == bidprice) {
+                    this.p.println("Enter your next bid price ? Current bid is "+bidprice);
+                } else {
+                    this.p.println("Your bid price is less than current "+bidprice+" bid next?");
+                }
                 
-                this.p.println("Enter your next bid price ? Current bid is "+bidprice);
             }
 
         } catch (Exception e) {
@@ -106,17 +137,7 @@ public class ClientHandle extends Thread{
     }
 
 
-    public static boolean isNumber(String num) {
-        if (num == null) {
-            return false;
-        }
-        try {
-            float f = Float.parseFloat(num);
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
-    }
+   
 
 }
 

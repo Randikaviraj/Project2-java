@@ -20,10 +20,10 @@ public class Symbols {
         return this.symbol;
     }
 
-    public synchronized float controlStock(String symbol,String price){
+    public synchronized float controlStock(String symbol,String price,String name){
         try {
             Thread.sleep(500);
-            return maingui.editRow(symbol,price);
+            return maingui.editRow(symbol,price,name);
         } catch (Exception e) {
             //TODO: handle exception
             System.out.println("Error in thread");
