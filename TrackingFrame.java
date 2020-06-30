@@ -91,6 +91,7 @@ public class TrackingFrame extends JFrame{
             } catch (Exception e) {
                 //TODO: handle exception
                 System.out.print("Eroor in server refresh()");
+                return;
             }
             
             noofrows=this.model.getRowCount();

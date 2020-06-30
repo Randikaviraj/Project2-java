@@ -23,10 +23,13 @@ public class  Server{
                             in.close();
                             server.close();
                             System.exit(0); 
+                        }else{
+                            System.out.println("To exit, command is quit");
                         } 
                     } catch (Exception e) {
                         //TODO: handle exception
-                        System.out.println("Error in your command");
+                        System.out.println("Error in Quit ");
+                        return;
                     }
                 }  
             }

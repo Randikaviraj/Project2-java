@@ -71,10 +71,20 @@ public class ClientHandle extends Thread{
             
             this.p.println("Enter your name as security code ?");
             this.nameofclient=this.br.readLine();
+            if (this.nameofclient==null) {
+                this.client.close();
+                return;
+            }
             this.p.println("Your are welcome to bidding "+this.nameofclient+".Please enter your symbol to bid...");
-
+            
             while (true) {
                 symbol=this.br.readLine();
+
+                if (symbol==null) {
+                    this.client.close();
+                    return;
+                }
+                
                 iterator = symbol_vector.iterator();
                 
                 while (iterator.hasNext()) {
@@ -87,7 +97,7 @@ public class ClientHandle extends Thread{
                 }
 
                 if (sym!=null) {
-                    this.p.println("Let's bid on "+sym.getSymbol());
+                    
                     Iterator<TrackedStock> itr;
                     itr=TrackedStock.getTracking().iterator();
                     TrackedStock item;
@@ -102,13 +112,13 @@ public class ClientHandle extends Thread{
                     break;
                 }
 
-                this.p.println("Your entered symbol is wrong enter correct one");
+                this.p.println(-1);
             }
 
             
 
             
-            this.p.println("Enter your bid price ?");
+            
             while (true) {
                 price=this.br.readLine();
 
@@ -116,6 +126,7 @@ public class ClientHandle extends Thread{
                     bidprice=sym.controlStock(symbol,price,this.nameofclient);
                 } else {
                     this.p.println("Error,--Enter a valid bid price ? ");
+                    this.client.close();
                     return;
                     
                 }
@@ -130,7 +141,9 @@ public class ClientHandle extends Thread{
 
         } catch (Exception e) {
                 //TODO: handle exception
+            
             System.out.println("Error is in server handle(run method) "+e);
+            return;
             
         }
        

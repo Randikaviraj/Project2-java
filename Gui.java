@@ -130,7 +130,8 @@ public class Gui extends JFrame{
         }  
         catch(IOException e)  
         {  
-            e.printStackTrace();  
+            e.printStackTrace();
+            System.exit(-1);  
         }  
     }
 
